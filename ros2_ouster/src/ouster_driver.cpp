@@ -153,6 +153,9 @@ void OusterDriver::onActivate()
   _processing_active = true;
   _process_thread = std::thread(std::bind(&OusterDriver::processData, this));
   _recv_thread = std::thread(std::bind(&OusterDriver::receiveData, this));
+  
+  // create bond connection
+  createBond();
 }
 
 void OusterDriver::onError()
@@ -176,6 +179,8 @@ void OusterDriver::onDeactivate()
   for (it = _data_processors.begin(); it != _data_processors.end(); ++it) {
     it->second->onDeactivate();
   }
+  // destroy bond connection
+  destroyBond();
 }
 
 void OusterDriver::onCleanup()
@@ -344,4 +349,26 @@ void OusterDriver::getMetadata(
   }
 }
 
+void OusterDriver::createBond()
+{
+  RCLCPP_INFO(get_logger(), "Creating bond (%s) to lifecycle manager.", this->get_name());
+
+  bond_ = std::make_unique<bond::Bond>(
+    std::string("bond"),
+    this->get_name(),
+    shared_from_this());
+
+  bond_->setHeartbeatPeriod(0.10);
+  bond_->setHeartbeatTimeout(4.0);
+  bond_->start();
+}
+
+void OusterDriver::destroyBond()
+{
+  RCLCPP_INFO(get_logger(), "Destroying bond (%s) to lifecycle manager.", this->get_name());
+
+  if (bond_) {
+    bond_.reset();
+  }
+}
 }  // namespace ros2_ouster

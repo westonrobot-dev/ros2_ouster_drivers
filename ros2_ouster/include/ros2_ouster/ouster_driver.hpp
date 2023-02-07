@@ -37,6 +37,8 @@
 #include "ros2_ouster/full_rotation_accumulator.hpp"
 
 #include "ros2_ouster/ringbuffer.hpp"
+#include "bondcpp/bond.hpp"
+#include "bond/msg/constants.hpp"
 
 namespace ros2_ouster
 {
@@ -141,6 +143,8 @@ private:
   * @brief Thread function to process buffered packets that have been received from the sensor
   */
   void processData();
+  void createBond();
+  void destroyBond();
 
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr _reset_srv;
   rclcpp::Service<ouster_msgs::srv::GetMetadata>::SharedPtr _metadata_srv;
@@ -169,6 +173,9 @@ private:
   std::condition_variable _process_cond;
   std::mutex _ringbuffer_mutex;
   bool _processing_active;
+
+  // Connection to tell that server is still up
+  std::unique_ptr<bond::Bond> bond_{nullptr};
 };
 
 }  // namespace ros2_ouster
