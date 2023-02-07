@@ -26,6 +26,7 @@ if(NOT TARGET JsonCpp::JsonCpp)
 elseif(NOT TARGET jsoncpp_lib)
   add_library(jsoncpp_lib ALIAS JsonCpp::JsonCpp)
 endif()
+find_package(bondcpp REQUIRED)
 
 include_directories(
   include
@@ -52,6 +53,7 @@ set(dependencies
   ouster_msgs
   tf2_geometry_msgs
   pcl_conversions
+  bondcpp
 )
 
 add_library(${library_name} SHARED
